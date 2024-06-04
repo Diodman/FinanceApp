@@ -5,8 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SavingsScreen = () => {
-  const [savings, setSavings] = useState(500); // Пример значения
-  const [goal, setGoal] = useState(1000); // Пример значения
+  const [savings, setSavings] = useState(500);
+  const [goal, setGoal] = useState('1000');
   const [amount, setAmount] = useState('');
 
   useEffect(() => {
@@ -14,10 +14,10 @@ const SavingsScreen = () => {
       const storedSavings = await AsyncStorage.getItem('savings');
       const storedGoal = await AsyncStorage.getItem('goal');
       if (storedSavings) {
-        setSavings(JSON.parse(storedSavings));
+        setSavings(parseFloat(storedSavings));
       }
       if (storedGoal) {
-        setGoal(JSON.parse(storedGoal));
+        setGoal(storedGoal);
       }
     };
 
@@ -26,8 +26,8 @@ const SavingsScreen = () => {
 
   useEffect(() => {
     const saveData = async () => {
-      await AsyncStorage.setItem('savings', JSON.stringify(savings));
-      await AsyncStorage.setItem('goal', JSON.stringify(goal));
+      await AsyncStorage.setItem('savings', savings.toString());
+      await AsyncStorage.setItem('goal', goal);
     };
 
     saveData();
@@ -78,10 +78,9 @@ const SavingsScreen = () => {
             placeholderTextColor="#ccc"
             value={goal}
             onChangeText={setGoal}
-            keyboardType="numeric"
           />
         </View>
-        <Text style={styles.goalText}>Цель: {goal} ₽</Text>
+        <Text style={styles.goalText}>Цель: {goal}</Text>
       </View>
     </LinearGradient>
   );

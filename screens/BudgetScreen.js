@@ -8,10 +8,6 @@ import AuthService from '../screens/AuthService';
 
 const BudgetScreen = () => {
   const navigation = useNavigation();
-  const onSwipeLeft = (gestureState) => {
-    navigation.goBack();
-  };
-
   const [user, setUser] = useState(null);
   const [expense, setExpense] = useState('');
   const [income, setIncome] = useState('');
@@ -20,8 +16,7 @@ const BudgetScreen = () => {
   const [dailySpend, setDailySpend] = useState(0);
   const today = new Date().toISOString().split('T')[0];
 
-  // В useEffect сохраняем данные
-useEffect(() => {
+  useEffect(() => {
     const saveData = async () => {
       if (user) {
         await AsyncStorage.setItem(`transactions_${user.email}`, JSON.stringify(transactions));
@@ -30,8 +25,7 @@ useEffect(() => {
     };
     saveData();
   }, [transactions, budget]);
-  
-  // В useEffect извлекаем данные
+
   useEffect(() => {
     const fetchData = async () => {
       const currentUser = await AuthService.getCurrentUser();
@@ -46,11 +40,10 @@ useEffect(() => {
     };
     fetchData();
   }, []);
-  
 
   useEffect(() => {
     const calculateDailySpend = () => {
-      if (budget === 0) return; // Добавляем проверку на ноль, чтобы избежать деления на ноль
+      if (budget === 0) return;
       const currentDate = new Date();
       const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
       const remainingDays = daysInMonth - currentDate.getDate() + 1;
@@ -202,30 +195,30 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 10,
     width: '100%',
-},
-expenseButton: {
-  backgroundColor: '#e74c3c',
-},
-incomeButton: {
-  backgroundColor: '#2ecc71',
-},
-transaction: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  padding: 10,
-  borderBottomWidth: 1,
-  borderBottomColor: '#ccc',
-},
-transactionText: {
-  fontSize: 16,
-  color: '#fff',
-},
-income: {
-  color: '#2ecc71',
-},
-expense: {
-  color: '#e74c3c',
-},
+  },
+  expenseButton: {
+    backgroundColor: '#e74c3c',
+  },
+  incomeButton: {
+    backgroundColor: '#2ecc71',
+  },
+  transaction: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  transactionText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  income: {
+    color: '#2ecc71',
+  },
+  expense: {
+    color: '#e74c3c',
+  },
 });
 
 export default BudgetScreen;

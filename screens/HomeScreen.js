@@ -3,29 +3,36 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import AuthService from '../screens/AuthService';
+import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
   const [dailySpend, setDailySpend] = useState(0);
+  const isFocused = useIsFocused();
+
+  const fetchData = async () => {
+    const currentUser = await AuthService.getCurrentUser();
+    setUser(currentUser);
+    if (currentUser) {
+      const budget = await AsyncStorage.getItem(`budget_${currentUser.email}`);
+      const savings = await AsyncStorage.getItem('savings');
+      const goal = await AsyncStorage.getItem('goal');
+      calculateDailySpend(Number(budget || 0));
+      setUser({
+        ...currentUser,
+        budget: Number(budget || 0),
+        savings: Number(savings || 0),
+        goal: goal || 'Нет цели',
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = await AuthService.getCurrentUser();
-      setUser(currentUser);
-      if (currentUser) {
-        calculateDailySpend(currentUser.budget);
-      }
-    };
-  
-    // Функция для обновления данных бюджета при каждом входе на экран
-    const updateBudgetOnFocus = navigation.addListener('focus', () => {
+    if (isFocused) {
       fetchData();
-    });
-  
-    // Отписываемся от слушателя при размонтировании компонента
-    return updateBudgetOnFocus;
-  }, [navigation]);
-  
+    }
+  }, [isFocused]);
 
   const calculateDailySpend = (budget) => {
     const currentDate = new Date();
@@ -48,9 +55,9 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.title}>Ваши накопления</Text>
         <View style={styles.budgetContainer}>
           <Icon name="wallet" type="entypo" color="#517fa4" size={40} />
-          <Text style={styles.budgetText}>{user ? user.savings : 100} ₽</Text>
+          <Text style={styles.budgetText}>{user ? user.savings : 0} ₽</Text>
         </View>
-        <Text style={styles.goalText}>Цель: {user ? user.goal : 100} ₽</Text>
+        <Text style={styles.goalText}>Цель: {user ? user.goal : 'Нет цели'}</Text>
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -81,7 +88,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 20,
   },
-
   budgetText: {
     fontSize: 32,
     fontWeight: 'bold',
